@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int startingHealth = 100;
-    public int currentHealth;
+    public float startingHealth = 100f;
+    public float currentHealth;
     public float sinkSpeed = 2.5f;
     public int scoreValue = 10;
     public AudioClip deathClip;
-
-
     Animator anim;
     AudioSource enemyAudio;
     ParticleSystem hitParticles;
@@ -16,14 +15,20 @@ public class EnemyHealth : MonoBehaviour
     bool isDead;
     bool isSinking;
 
+    public Image healthBar;
+   
+
+    
+
 
     void Awake ()
     {
+      
         anim = GetComponent <Animator> ();
         enemyAudio = GetComponent <AudioSource> ();
         hitParticles = GetComponentInChildren <ParticleSystem> ();
         capsuleCollider = GetComponent <CapsuleCollider> ();
-
+       
         currentHealth = startingHealth;
     }
 
@@ -34,27 +39,37 @@ public class EnemyHealth : MonoBehaviour
         {
             transform.Translate (-Vector3.up * sinkSpeed * Time.deltaTime);
         }
+        
+
     }
 
 
     public void TakeDamage (int amount, Vector3 hitPoint)
     {
+        
         if(isDead)
             return;
 
         enemyAudio.Play ();
 
         currentHealth -= amount;
+        
             
         hitParticles.transform.position = hitPoint;
         hitParticles.Play();
-
-        if(currentHealth <= 0)
+        healthBar.fillAmount = currentHealth / startingHealth;
+        if (healthBar == null);
         {
+            Debug.Log("is null");
+        }
+
+        if (currentHealth <= 0)
+        {
+            FindObjectOfType<HitStop>().Stop(1f);
             Death ();
         }
     }
-
+    
 
     void Death ()
     {

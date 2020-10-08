@@ -11,17 +11,18 @@ public class PlayerHealth : MonoBehaviour
     public Slider healthSlider;
     public Image damageImage;
     public AudioClip deathClip;
+    public AudioClip lowHealthClip;
     public float flashSpeed = 5f;
     public Color flashColour = new Color(1f, 0f, 0f, 0.1f);
-
+    public TimeManager timeManager;
 
     Animator anim;
     AudioSource playerAudio;
     PlayerMovement playerMovement;
     PlayerShooting playerShooting;
     bool isDead;
-    bool damaged;
-
+    public bool damaged;
+    public CameraShake cameraShake;
 
     void Awake ()
     {
@@ -38,6 +39,7 @@ public class PlayerHealth : MonoBehaviour
         if(damaged)
         {
             damageImage.color = flashColour;
+
         }
         else
         {
@@ -53,12 +55,22 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth -= amount;
 
+        StartCoroutine(cameraShake.Shake(.15f, .4f));
+
         healthSlider.value = currentHealth;
 
         playerAudio.Play ();
 
-        if(currentHealth <= 0 && !isDead)
+        if (currentHealth <= 25)
         {
+            playerAudio.loop = true;
+            playerAudio.clip = lowHealthClip;
+            playerAudio.Play();
+        }
+        
+        if (currentHealth <= 0 && !isDead)
+        {
+            timeManager.BulletTime();
             Death ();
         }
     }
@@ -71,7 +83,7 @@ public class PlayerHealth : MonoBehaviour
         playerShooting.DisableEffects ();
 
         anim.SetTrigger ("Die");
-
+        playerAudio.loop = false;
         playerAudio.clip = deathClip;
         playerAudio.Play ();
 
